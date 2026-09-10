@@ -1,48 +1,33 @@
-// const request = require("supertest");
-// const app = require("../src/app");
+const { normalizeInvoiceData } = require('../src/invoice-data');
 
-// describe("GET /search", () => {
-//   afterEach(() => {
-//     jest.restoreAllMocks();
-//   });
+describe('normalizeInvoiceData', () => {
+    test('calculates the total from validated line items', () => {
+        const invoice = normalizeInvoiceData({
+            supplier: {},
+            customer: {},
+            payment: {},
+            total: 999,
+            items: [
+                { popis: 'Práce', mnozstvi: '2', mernaJednotka: 'hod', cenaZaMj: '125.5' },
+                { popis: 'Materiál', mnozstvi: 1, mernaJednotka: 'ks', cenaZaMj: 50 }
+            ]
+        });
 
-//   test("returns 400 when query is missing", async () => {
-//     const response = await request(app).get("/search");
+        expect(invoice.total).toBe(301);
+        expect(invoice.items[0]).toEqual({
+            popis: 'Práce',
+            mnozstvi: 2,
+            mernaJednotka: 'hod',
+            cenaZaMj: 125.5
+        });
+    });
 
-//     expect(response.status).toBe(400);
-//     expect(response.text).toBe("Missing search query");
-//   });
-
-//   test("returns filtered search results", async () => {
-//     global.fetch = jest.fn().mockResolvedValue({
-//       json: jest.fn().mockResolvedValue({
-//         results: [
-//           {
-//             url: "https://example.com",
-//             title: "Example",
-//             content: "Content",
-//             irrelevant: "removed"
-//           }
-//         ]
-//       })
-//     });
-
-//     const response = await request(app)
-//       .get("/search")
-//       .query({ query: "nodejs" });
-
-//     expect(response.status).toBe(200);
-//     expect(response.headers["content-type"]).toMatch(/application\/json/);
-//     expect(response.headers["content-disposition"]).toContain(
-//       'attachment; filename="output.json"'
-//     );
-
-//     expect(response.body).toEqual([
-//       {
-//         url: "https://example.com",
-//         title: "Example",
-//         content: "Content"
-//       }
-//     ]);
-//   });
-// });
+    test('rejects negative or non-numeric line item values', () => {
+        expect(normalizeInvoiceData({ items: [
+            { mnozstvi: -1, cenaZaMj: 10 }
+        ] })).toBeNull();
+        expect(normalizeInvoiceData({ items: [
+            { mnozstvi: 'not-a-number', cenaZaMj: 10 }
+        ] })).toBeNull();
+    });
+});

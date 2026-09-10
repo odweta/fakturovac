@@ -22,6 +22,94 @@ body {
     font-family: "Trebuchet MS", "Segoe UI", sans-serif;
 }
 
+[hidden] {
+    display: none !important;
+}
+
+#auth-screen {
+    display: grid;
+    min-height: calc(100vh - 6rem);
+    place-items: center;
+}
+
+.auth-card {
+    width: min(100%, 460px);
+    padding: clamp(1.75rem, 5vw, 3.5rem);
+    background: var(--paper);
+    border: 1px solid rgba(24, 59, 86, 0.12);
+    box-shadow: var(--shadow);
+}
+
+.eyebrow {
+    margin: 0 0 0.75rem;
+    color: var(--blue);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+}
+
+.auth-card h1 {
+    margin: 0;
+    color: var(--navy);
+    font-family: Georgia, serif;
+    font-size: clamp(2rem, 6vw, 3.4rem);
+    font-weight: 500;
+    line-height: 1.05;
+}
+
+.auth-intro {
+    margin: 1.25rem 0 2rem;
+    color: var(--muted-ink);
+    line-height: 1.6;
+}
+
+#auth-form {
+    display: grid;
+    gap: 1rem;
+}
+
+#auth-form .form-group {
+    margin: 0;
+}
+
+#authSubmitButton {
+    margin-top: 0.5rem;
+    padding: 0.8rem 1rem;
+    color: #fff;
+    background: var(--navy);
+    border: 0;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+#authSubmitButton:hover:not(:disabled) {
+    background: var(--blue);
+}
+
+.text-button {
+    padding: 0;
+    color: var(--blue);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+}
+
+.text-button:hover {
+    color: var(--navy);
+    text-decoration: underline;
+}
+
+.auth-status {
+    min-height: 1.25rem;
+    margin: 0;
+    color: #a53c36;
+}
+
 #main-container {
     width: min(100%, 980px);
     margin: 0 auto;
@@ -31,6 +119,303 @@ body {
     box-shadow: var(--shadow);
 }
 
+.top-navigation {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    margin-bottom: 2rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.nav-menu {
+    position: relative;
+}
+
+.nav-menu summary {
+    list-style: none;
+    padding: 0.65rem 0.9rem;
+    color: var(--navy);
+    background: transparent;
+    border: 1px solid var(--blue);
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.nav-menu summary::-webkit-details-marker {
+    display: none;
+}
+
+.nav-menu summary::after {
+    margin-left: 0.5rem;
+    content: "▾";
+}
+
+.nav-menu[open] summary::after {
+    content: "▴";
+}
+
+.nav-menu-content {
+    position: absolute;
+    z-index: 2;
+    top: calc(100% + 0.45rem);
+    left: 0;
+    display: grid;
+    min-width: 20rem;
+    gap: 0.35rem;
+    padding: 0.55rem;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+}
+
+.nav-menu-content .nav-button,
+.nav-menu-content .text-button {
+    width: 100%;
+    white-space: nowrap;
+    text-align: left;
+}
+
+.menu-icon {
+    display: inline-block;
+    width: 1.35rem;
+    margin-right: 0.35rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.menu-icon svg {
+    display: block;
+    width: 1.05rem;
+    height: 1.05rem;
+    margin: 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+}
+
+.current-view-label {
+    color: var(--muted-ink);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.nav-account {
+    margin-left: auto;
+}
+
+.nav-account summary {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    max-width: 280px;
+}
+
+.nav-account .nav-menu-content {
+    right: 0;
+    left: auto;
+}
+
+.danger-nav-button {
+    color: #8c3d36 !important;
+    border-color: #c47a72 !important;
+}
+
+.danger-nav-button:hover {
+    color: #fff !important;
+    background: #a53c36 !important;
+}
+
+.nav-button,
+.primary-action {
+    padding: 0.65rem 0.9rem;
+    color: var(--navy);
+    background: transparent;
+    border: 1px solid var(--blue);
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+.primary-nav-button,
+.primary-action {
+    color: #fff;
+    background: var(--navy);
+}
+
+.nav-button:hover,
+.primary-action:hover {
+    color: #fff;
+    background: var(--blue);
+}
+
+.nav-account {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-left: auto;
+}
+
+.account-mark {
+    position: relative;
+    display: inline-block;
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 1px solid var(--blue);
+    border-radius: 50%;
+}
+
+.account-mark::before {
+    position: absolute;
+    top: 0.28rem;
+    left: 0.52rem;
+    width: 0.42rem;
+    height: 0.42rem;
+    background: var(--blue);
+    border-radius: 50%;
+    content: "";
+}
+
+.account-mark::after {
+    position: absolute;
+    bottom: 0.25rem;
+    left: 0.32rem;
+    width: 0.8rem;
+    height: 0.42rem;
+    background: var(--blue);
+    border-radius: 0.5rem 0.5rem 0.25rem 0.25rem;
+    content: "";
+}
+
+.invoice-list-screen {
+    width: 100%;
+}
+
+.screen-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.screen-heading h1 {
+    margin: 0;
+    color: var(--navy);
+    font-family: Georgia, serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 500;
+}
+
+.screen-heading .eyebrow {
+    margin-bottom: 0.35rem;
+}
+
+.invoice-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.invoice-list-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f4f7fb;
+    border: 1px solid var(--line);
+}
+
+.invoice-open-button {
+    display: grid;
+    grid-template-columns: minmax(8rem, 0.8fr) minmax(10rem, 2fr) auto;
+    align-items: center;
+    flex: 1;
+    gap: 1rem;
+    padding: 0.5rem;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+}
+
+.invoice-open-button strong {
+    color: var(--navy);
+}
+
+.invoice-open-button small {
+    color: var(--muted-ink);
+}
+
+.invoice-delete-button {
+    align-self: center;
+    padding: 0.55rem 0.75rem;
+    color: #8c3d36;
+    background: transparent;
+    border: 1px solid #c47a72;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font: inherit;
+}
+
+.invoice-delete-button:hover {
+    color: #fff;
+    background: #a53c36;
+}
+
+.empty-list {
+    padding: 2.5rem 1rem;
+    color: var(--muted-ink);
+    background: #f4f7fb;
+    border: 1px dashed var(--line);
+    text-align: center;
+}
+
+.invoice-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 820px;
+    color: var(--muted-ink);
+    font-size: 0.9rem;
+}
+
+.invoice-meta span {
+    color: var(--navy);
+    font-weight: 700;
+}
+
+.save-invoice-button {
+    align-self: center;
+    padding: 0.75rem 1rem;
+    color: #fff;
+    background: var(--blue);
+    border: 0;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+.save-invoice-button:hover {
+    background: var(--navy);
+}
+
+.invoice-save-status {
+    min-height: 1.25rem;
+    margin: -1.25rem 0 0;
+    color: var(--muted-ink);
+    text-align: center;
+}
+
 #main-form {
     display: flex;
     flex-direction: column;
@@ -38,8 +423,16 @@ body {
     gap: 2rem;
 }
 
-#main-form > h2 {
+.app-heading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
+    gap: 1rem;
+}
+
+.app-heading h2 {
+    width: auto;
     margin: 0;
     color: var(--navy);
     font-family: Georgia, serif;
@@ -47,6 +440,109 @@ body {
     font-weight: 500;
     letter-spacing: 0.02em;
     text-align: center;
+}
+
+.app-heading .text-button {
+    color: var(--muted-ink);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.account-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.account-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    gap: 0.75rem;
+    min-height: 1.5rem;
+}
+
+.signed-in-email {
+    max-width: 220px;
+    overflow: hidden;
+    color: var(--muted-ink);
+    font-size: 0.8rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.password-panel {
+    width: 100%;
+    max-width: 820px;
+    padding: 1rem 1.25rem;
+    background: #f4f7fb;
+    border: 1px solid var(--line);
+}
+
+.password-panel h3 {
+    margin: 0 0 1rem;
+    color: var(--navy);
+    font-family: Georgia, serif;
+    font-weight: 500;
+}
+
+.password-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.payment-preset-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+}
+
+.payment-preset-name {
+    margin-bottom: 1rem;
+}
+
+.payment-preset-actions button {
+    min-height: 2.6rem;
+    padding: 0.55rem 0.7rem;
+    color: var(--navy);
+    background: transparent;
+    border: 1px solid var(--blue);
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.payment-preset-actions button:hover:not(:disabled) {
+    color: #fff;
+    background: var(--blue);
+}
+
+.payment-preset-actions .secondary-button {
+    color: #8c3d36;
+    border-color: #c47a72;
+}
+
+.payment-preset-actions .secondary-button:hover:not(:disabled) {
+    background: #a53c36;
+}
+
+.payment-preset-actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.payment-preset-column,
+.payment-account-column {
+    min-width: 0;
 }
 
 .form-chapter {
@@ -120,11 +616,16 @@ body {
 
 .third-row {
     align-items: flex-start;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
 }
 
-.third-row > .form-part,
-.third-row > .form-group {
-    flex: 1;
+.total-amount-group {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
 }
 
 .supplier-customer-section {
@@ -147,6 +648,91 @@ body {
     font-family: Georgia, serif;
     font-size: 1.35rem;
     font-weight: 500;
+}
+
+select {
+    width: 100%;
+    padding: 0.65rem 0.7rem;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid #c8d0d5;
+    border-radius: 0.25rem;
+    font: inherit;
+}
+
+select:focus {
+    border-color: var(--blue);
+    outline: 2px solid rgba(43, 111, 143, 0.18);
+    outline-offset: 1px;
+}
+
+.person-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.saved-data-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    gap: 0.65rem;
+    margin-top: 0.25rem;
+}
+
+.saved-data-actions button {
+    min-height: 2.6rem;
+}
+
+.client-actions,
+#dodavatelWrapper > .saved-data-actions {
+    width: 100%;
+}
+
+.client-actions button,
+#dodavatelWrapper > .saved-data-actions button {
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.saved-data-actions > [role="status"] {
+    grid-column: 1 / -1;
+}
+
+.saved-data-actions button {
+    padding: 0.55rem 0.75rem;
+    color: var(--navy);
+    background: transparent;
+    border: 1px solid var(--blue);
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.saved-data-actions button:hover:not(:disabled) {
+    color: #fff;
+    background: var(--blue);
+}
+
+.saved-data-actions .secondary-button {
+    color: #8c3d36;
+    border-color: #c47a72;
+}
+
+.saved-data-actions .secondary-button:hover:not(:disabled) {
+    background: #a53c36;
+}
+
+.saved-data-actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+#supplierSaveStatus {
+    color: var(--muted-ink);
+    font-size: 0.85rem;
 }
 
 #itemsContainer {
@@ -234,11 +820,16 @@ body {
     font: inherit;
     font-weight: 700;
     padding: 0.6rem 0.85rem;
+    margin-bottom: 0.25rem;
 }
 
 #addItemButton:hover {
     color: #fff;
     background: var(--blue);
+}
+
+#printInvoiceButton {
+    margin-top: 0.25rem;
 }
 
 @media (max-width: 700px) {
@@ -250,9 +841,50 @@ body {
         padding: 1.5rem 1rem;
     }
 
+    .top-navigation,
+    .nav-account {
+        flex-wrap: wrap;
+    }
+
+    .nav-account {
+        justify-content: flex-start;
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .screen-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .invoice-open-button {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+    }
+
     .supplier-customer-section {
         grid-template-columns: 1fr;
         row-gap: 1rem;
+    }
+
+    .app-heading {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .account-bar {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .password-fields,
+    .person-fields,
+    .third-row {
+        grid-template-columns: 1fr;
+    }
+
+    .total-amount-group {
+        grid-column: auto;
     }
 
     .invoice-item {

@@ -7,10 +7,106 @@
     <title>Fakturovač</title>
 </head>
 <body>
-    <main id="main-container">
-        <div>
+    <section id="auth-screen" aria-labelledby="auth-title">
+        <div class="auth-card">
+            <p class="eyebrow">FAKTUROVAČ</p>
+            <h1 id="auth-title">Vaše faktury, bezpečně po ruce</h1>
+            <p class="auth-intro">Přihlaste se a mějte dodavatele i odběratele uložené ve svém účtu.</p>
+            <form id="auth-form">
+                <div class="form-group">
+                    <label for="authEmail">E-mail</label>
+                    <input id="authEmail" type="email" autocomplete="email" required />
+                </div>
+                <div class="form-group">
+                    <label for="authPassword">Heslo</label>
+                    <input id="authPassword" type="password" minlength="8" autocomplete="current-password" required />
+                </div>
+                <button type="submit" id="authSubmitButton">Přihlásit se</button>
+                <button type="button" id="authModeButton" class="text-button">Nemáte účet? Zaregistrovat se</button>
+                <button type="button" id="forgotPasswordButton" class="text-button">Zapomenuté heslo?</button>
+                <p id="authStatus" class="auth-status" role="alert" aria-live="polite"></p>
+            </form>
+        </div>
+    </section>
+
+    <main id="main-container" hidden>
+        <nav class="top-navigation" aria-label="Hlavní navigace">
+            <details class="nav-menu">
+                <summary>Faktury</summary>
+                <div class="nav-menu-content">
+                    <button type="button" id="invoiceListNavButton" class="nav-button">
+                        <span class="menu-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                        </span>
+                        Seznam faktur
+                    </button>
+                    <button type="button" id="newInvoiceButton" class="nav-button">
+                        <span class="menu-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </span>
+                        Nová faktura
+                    </button>
+                    <button type="button" id="exportInvoicesButton" class="nav-button">
+                        <span class="menu-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>
+                        </span>
+                        Export PDF (ZIP)
+                    </button>
+                    <button type="button" id="deleteAllInvoicesButton" class="nav-button danger-nav-button">
+                        <span class="menu-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg>
+                        </span>
+                        Smazat všechny a resetovat číslování
+                    </button>
+                </div>
+            </details>
+            <span id="currentViewLabel" class="current-view-label">Seznam faktur</span>
+            <details class="nav-menu nav-account">
+                <summary><span class="account-mark" aria-hidden="true"></span><span id="navEmail" class="signed-in-email"></span></summary>
+                <div class="nav-menu-content account-menu-content">
+                    <button type="button" id="passwordButton" class="text-button">Změnit heslo</button>
+                    <button type="button" id="logoutButton" class="text-button">Odhlásit se</button>
+                </div>
+            </details>
+        </nav>
+
+        <section id="passwordPanel" class="password-panel" hidden>
+            <div id="passwordForm">
+                <h3>Změnit heslo</h3>
+                <div class="password-fields">
+                    <div class="form-group">
+                        <label for="currentPassword">Současné heslo</label>
+                        <input id="currentPassword" type="password" autocomplete="current-password" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">Nové heslo</label>
+                        <input id="newPassword" type="password" minlength="8" autocomplete="new-password" required />
+                    </div>
+                </div>
+                <div class="saved-data-actions">
+                    <button type="button" id="savePasswordButton">Uložit nové heslo</button>
+                    <button type="button" id="cancelPasswordButton" class="secondary-button">Zrušit</button>
+                    <span id="passwordStatus" role="status" aria-live="polite"></span>
+                </div>
+            </div>
+        </section>
+
+        <section id="invoice-list-screen" class="invoice-list-screen">
+            <div class="screen-heading">
+                <div>
+                    <p class="eyebrow">ARCHIV</p>
+                    <h1>Vaše faktury</h1>
+                </div>
+            </div>
+            <div id="invoiceList" class="invoice-list"></div>
+        </section>
+
+        <div id="invoice-editor-screen" hidden>
             <form id="main-form">
-                <h2>Fakturovač</h2>
+                <div class="invoice-meta">
+                    <span id="invoiceNumberDisplay">Nová faktura</span>
+                </div>
+
                 <!--
                     ico
                     jmeno
@@ -30,7 +126,7 @@
                     ----------
 
                     polozky
-                    + popis
+                    + položka
                     + mnozstvi
                     + merna jednotka MJ
                     + cena za MJ
@@ -44,18 +140,33 @@
                         <h3>Dodavatel</h3>
 
                         <div class="form-group">
+                            <label for="dodavatelTypSubjektu">Typ dodavatele</label>
+                            <select id="dodavatelTypSubjektu">
+                                <option value="osoba">Jméno a příjmení</option>
+                                <option value="spolecnost">Společnost</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
                             <label for="dodavatelIco">IČO</label>
                             <input id="dodavatelIco" name="dodavatelIco" />
                         </div>
 
-                        <div class="form-group">
-                            <label for="dodavatelJmeno">Jméno</label>
-                            <input id="dodavatelJmeno" name="dodavatelJmeno" />
+                        <div id="supplierPersonFields" class="person-fields">
+                            <div class="form-group">
+                                <label for="dodavatelJmeno">Jméno</label>
+                                <input id="dodavatelJmeno" name="dodavatelJmeno" />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="dodavatelPrijmeni">Příjmení</label>
+                                <input id="dodavatelPrijmeni" name="dodavatelPrijmeni" />
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="dodavatelPrijmeni">Příjmení</label>
-                            <input id="dodavatelPrijmeni" name="dodavatelPrijmeni" />
+                        <div id="supplierCompanyFields" class="form-group" hidden>
+                            <label for="dodavatelNazevSpolecnosti">Název společnosti</label>
+                            <input id="dodavatelNazevSpolecnosti" name="dodavatelNazevSpolecnosti" />
                         </div>
 
                         <div class="form-group">
@@ -72,10 +183,23 @@
                             <label for="dodavatelMesto">Město</label>
                             <input id="dodavatelMesto" name="dodavatelMesto" />
                         </div>
+
+                        <div class="saved-data-actions">
+                            <button type="button" id="saveSupplierButton">Uložit dodavatele</button>
+                            <button type="button" id="loadSupplierButton" class="secondary-button">Načíst uloženého</button>
+                            <span id="supplierSaveStatus" role="status" aria-live="polite"></span>
+                        </div>
                     </div>
 
                     <div id="odberatelWrapper" class="form-part">
                         <h3>Odběratel</h3>
+
+                        <div class="form-group">
+                            <label for="clientSelect">Uložený odběratel</label>
+                            <select id="clientSelect">
+                                <option value="">Vyberte odběratele</option>
+                            </select>
+                        </div>
 
                         <div class="form-group">
                             <label for="odberatelIco">IČO</label>
@@ -83,13 +207,28 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="odberatelJmeno">Jméno</label>
-                            <input id="odberatelJmeno" name="odberatelJmeno" />
+                            <label for="odberatelTypSubjektu">Typ odběratele</label>
+                            <select id="odberatelTypSubjektu">
+                                <option value="osoba">Jméno a příjmení</option>
+                                <option value="spolecnost">Společnost</option>
+                            </select>
                         </div>
 
-                        <div class="form-group">
-                            <label for="odberatelPrijmeni">Příjmení</label>
-                            <input id="odberatelPrijmeni" name="odberatelPrijmeni" />
+                        <div id="personFields" class="person-fields">
+                            <div class="form-group">
+                                <label for="odberatelJmeno">Jméno</label>
+                                <input id="odberatelJmeno" name="odberatelJmeno" />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="odberatelPrijmeni">Příjmení</label>
+                                <input id="odberatelPrijmeni" name="odberatelPrijmeni" />
+                            </div>
+                        </div>
+
+                        <div id="companyFields" class="form-group" hidden>
+                            <label for="odberatelNazevSpolecnosti">Název společnosti</label>
+                            <input id="odberatelNazevSpolecnosti" name="odberatelNazevSpolecnosti" />
                         </div>
 
                         <div class="form-group">
@@ -106,6 +245,13 @@
                             <label for="odberatelMesto">Město</label>
                             <input id="odberatelMesto" name="odberatelMesto" />
                         </div>
+
+                        <div class="saved-data-actions client-actions">
+                            <button type="button" id="saveClientButton">Uložit odběratele</button>
+                            <button type="button" id="deleteClientButton" class="secondary-button" disabled>
+                                Smazat vybraného
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -118,7 +264,27 @@
                 </div>
 
                 <div class="form-chapter third-row">
-                    <div class="form-part">
+                    <div class="payment-preset-column">
+                        <div class="form-group">
+                            <label for="paymentPresetSelect">Uložené platební údaje</label>
+                            <select id="paymentPresetSelect">
+                                <option value="">Vyberte konfiguraci</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group payment-preset-name">
+                            <label for="paymentPresetName">Název platebních údajů</label>
+                            <input id="paymentPresetName" type="text" placeholder="Např. hlavní účet" />
+                        </div>
+
+                        <div class="payment-preset-actions">
+                            <button type="button" id="savePaymentPresetButton">Uložení platebních údajů</button>
+                            <button type="button" id="loadPaymentPresetButton">Načtení platebních údajů</button>
+                            <button type="button" id="deletePaymentPresetButton" class="secondary-button" disabled>Smazat</button>
+                        </div>
+                    </div>
+
+                    <div class="payment-account-column">
                         <div class="form-group">
                             <label for="cisloUctu">Číslo účtu</label>
                             <input id="cisloUctu" name="cisloUctu" />
@@ -135,15 +301,35 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="total">Celková částka</label>
-                        <output id="total" name="total">0.00</output>
+                    <div class="form-group total-amount-group">
+                        <label for="total">Celková částka (CZK)</label>
+                        <output id="total" name="total">0.00 Kč</output>
+                    </div>
+
+                    <div class="due-date-group">
+                        <div class="form-group">
+                            <label for="dueDateOption">Datum splatnosti</label>
+                            <select id="dueDateOption">
+                                <option value="14">14 dní</option>
+                                <option value="30">30 dní</option>
+                                <option value="custom">Vlastní počet dní</option>
+                            </select>
+                        </div>
+                        <div class="form-group custom-due-days-group" hidden>
+                            <label for="customDueDays">Počet dní</label>
+                            <input id="customDueDays" type="number" min="1" step="1" value="14" />
+                        </div>
+                        <output id="dueDateDisplay" class="due-date-display"></output>
                     </div>
                 </div>
 
                 <button type="button" id="printInvoiceButton">
                     Vygenerovat a vytisknout fakturu
                 </button>
+                <button type="button" id="saveInvoiceButton" class="save-invoice-button">
+                    Uložit fakturu
+                </button>
+                <p id="invoiceSaveStatus" class="invoice-save-status" role="status" aria-live="polite"></p>
             </form>
         </div>
     </main>

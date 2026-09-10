@@ -1,6 +1,34 @@
 name: fakturovac
 services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: fakturovac
+      POSTGRES_USER: fakturovac
+      POSTGRES_PASSWORD: fakturovac
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fakturovac -d fakturovac"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
   app:
     build: .
+    environment:
+      DATABASE_URL: postgres://fakturovac:fakturovac@db:5432/fakturovac
+      NODE_ENV: production
+      SESSION_COOKIE_SECURE: "false"
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "3001:3001"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3001/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
