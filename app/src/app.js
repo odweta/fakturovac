@@ -574,28 +574,29 @@ const renderInvoicePdf = async (document, invoice) => {
 
     const tableTop = document.y + 12;
     const columns = [0, pageWidth * 0.52, pageWidth * 0.68, pageWidth * 0.82, pageWidth];
-    const rowHeight = 25;
-    document.rect(document.page.margins.left, tableTop, pageWidth, rowHeight).fill('#eef1f3');
+    const headerRowHeight = 25;
+    const itemRowHeight = 22.5;
+    document.rect(document.page.margins.left, tableTop, pageWidth, headerRowHeight).fill('#eef1f3');
     document.fillColor(navy).font(boldFont).fontSize(9);
     ['Položka', 'Množství', 'MJ', 'Cena za MJ'].forEach((heading, index) => {
         document.text(heading, document.page.margins.left + columns[index] + 6, tableTop + 8, {
             width: columns[index + 1] - columns[index] - 12
         });
     });
-    document.y = tableTop + rowHeight;
+    document.y = tableTop + headerRowHeight;
     (data.items || []).forEach((item, index) => {
         const rowTop = document.y;
-        document.rect(document.page.margins.left, rowTop, pageWidth, rowHeight)
+        document.rect(document.page.margins.left, rowTop, pageWidth, itemRowHeight)
             .fill(index % 2 ? lightBlue : warm);
-        document.moveTo(document.page.margins.left, rowTop + rowHeight)
-            .lineTo(document.page.margins.left + pageWidth, rowTop + rowHeight)
+        document.moveTo(document.page.margins.left, rowTop + itemRowHeight)
+            .lineTo(document.page.margins.left + pageWidth, rowTop + itemRowHeight)
             .strokeColor(line).lineWidth(0.7).stroke();
         document.fillColor(bodyText).font(regularFont).fontSize(9);
         [pdfText(item.popis), formatCzechNumber(item.mnozstvi), pdfText(item.mernaJednotka), `${formatCzechNumber(item.cenaZaMj)} Kč`]
-            .forEach((value, columnIndex) => document.text(value, document.page.margins.left + columns[columnIndex] + 6, rowTop + 8, {
+            .forEach((value, columnIndex) => document.text(value, document.page.margins.left + columns[columnIndex] + 6, rowTop + 6, {
                 width: columns[columnIndex + 1] - columns[columnIndex] - 12
             }));
-        document.y = rowTop + rowHeight;
+        document.y = rowTop + itemRowHeight;
     });
 
     document.y += 18;
