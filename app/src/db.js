@@ -81,6 +81,15 @@ const initializeDatabase = () => {
                 UNIQUE (user_id, name)
             );
 
+            CREATE TABLE IF NOT EXISTS signature_presets (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                data_url TEXT NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                UNIQUE (user_id, name)
+            );
+
             ALTER TABLE supplier_profiles ADD COLUMN IF NOT EXISTS nazev_spolecnosti TEXT NOT NULL DEFAULT '';
             ALTER TABLE supplier_profiles ADD COLUMN IF NOT EXISTS typ_subjektu TEXT NOT NULL DEFAULT 'osoba';
             ALTER TABLE clients ADD COLUMN IF NOT EXISTS nazev_spolecnosti TEXT NOT NULL DEFAULT '';
