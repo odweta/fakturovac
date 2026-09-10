@@ -481,7 +481,7 @@ const buildPaymentQrPayload = (payment, total, invoiceNumber = '') => {
     ].filter(Boolean).join('*');
 };
 
-const appendInvoicePdf = async (archive, invoice) => {
+const renderInvoicePdf = async (document, invoice) => {
     const data = invoice.invoice_data || {};
     const supplier = data.supplier || {};
     const customer = data.customer || {};
@@ -492,7 +492,6 @@ const appendInvoicePdf = async (archive, invoice) => {
     const customerName = customer.typSubjektu === 'spolecnost'
         ? customer.nazevSpolecnosti
         : [customer.jmeno, customer.prijmeni].filter(Boolean).join(' ');
-    const document = new PDFDocument({ size: 'A4', margin: 50 });
     const regularFont = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
     const boldFont = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
     const qrPayload = buildPaymentQrPayload(payment, data.total, invoice.invoice_number);
@@ -503,12 +502,10 @@ const appendInvoicePdf = async (archive, invoice) => {
     }) : null;
     const pageWidth = document.page.width - document.page.margins.left - document.page.margins.right;
     const navy = '#183b56';
-    const blue = '#2b6f8f';
     const line = '#d8d4cc';
     const lightBlue = '#f4f7fb';
     const warm = '#fffaf0';
     const bodyText = '#17202a';
-    const muted = '#65717d';
     const address = (profile) => [
         profile.uliceCp,
         [profile.psc, profile.mesto].filter(Boolean).join(', ')
@@ -521,7 +518,6 @@ const appendInvoicePdf = async (archive, invoice) => {
     const partyWidth = (pageWidth - 24) / 2;
     const customerX = document.page.margins.left + partyWidth + 24;
 
-    archive.append(document, { name: `${invoice.invoice_number}.pdf` });
     const headerY = document.y;
     document.fillColor(navy).font(boldFont).fontSize(25).text('Faktura', document.page.margins.left, headerY);
     document.fillColor(navy).font(boldFont).fontSize(16).text(invoice.invoice_number, customerX, headerY, {
@@ -589,6 +585,30 @@ const appendInvoicePdf = async (archive, invoice) => {
     }
     document.end();
 };
+
+const appendInvoicePdf = async (archive, invoice) => {
+    const document = new PDFDocument({ size: 'A4', margin: 50 });
+    archive.append(document, { name: `${invoice.invoice_number}.pdf` });
+    await renderInvoicePdf(document, invoice);
+};
+
+app.post('/api/invoices/pdf', requireAuth, async (req, res, next) => {
+    try {
+        const data = normalizeInvoiceData(req.body.data);
+        if (!data) {
+            res.status(400).json({ error: 'Neplatná data faktury.' });
+            return;
+        }
+
+        const invoiceNumber = String(req.body.invoiceNumber || 'Nová faktura').trim() || 'Nová faktura';
+        const document = new PDFDocument({ size: 'A4', margin: 50 });
+        res.attachment(`${invoiceNumber}.pdf`);
+        document.pipe(res);
+        await renderInvoicePdf(document, { invoice_number: invoiceNumber, invoice_data: data });
+    } catch (error) {
+        next(error);
+    }
+});
 
 app.get('/api/invoices/export', requireAuth, async (req, res, next) => {
     try {
