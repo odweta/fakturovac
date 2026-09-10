@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css" />
+    <title>Fakturovač</title>
+</head>
+<body>
+    <main id="main-container">
+        <div>
+            <form id="main-form">
+                <h2>Fakturovač</h2>
+                <!--
+                    ico
+                    jmeno
+                    prijmeni
+                    ulice, c.p.
+                    psc
+                    mesto
+
+                    ^^^ x2 - dodavatel, odberatel
+
+                    ----------
+
+                    cislo uctu
+                    iban
+                    swift
+
+                    ----------
+
+                    polozky
+                    + popis
+                    + mnozstvi
+                    + merna jednotka MJ
+                    + cena za MJ
+
+                    ----------
+
+                    total soucet
+                -->
+                <div class="form-chapter supplier-customer-section">
+                    <div id="dodavatelWrapper" class="form-part">
+                        <h3>Dodavatel</h3>
+
+                        <div class="form-group">
+                            <label for="dodavatelIco">IČO</label>
+                            <input id="dodavatelIco" name="dodavatelIco" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dodavatelJmeno">Jméno</label>
+                            <input id="dodavatelJmeno" name="dodavatelJmeno" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dodavatelPrijmeni">Příjmení</label>
+                            <input id="dodavatelPrijmeni" name="dodavatelPrijmeni" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dodavatelUliceCp">Ulice a číslo popisné</label>
+                            <input id="dodavatelUliceCp" name="dodavatelUliceCp" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dodavatelPsc">PSČ</label>
+                            <input id="dodavatelPsc" name="dodavatelPsc" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dodavatelMesto">Město</label>
+                            <input id="dodavatelMesto" name="dodavatelMesto" />
+                        </div>
+                    </div>
+
+                    <div id="odberatelWrapper" class="form-part">
+                        <h3>Odběratel</h3>
+
+                        <div class="form-group">
+                            <label for="odberatelIco">IČO</label>
+                            <input id="odberatelIco" name="odberatelIco" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="odberatelJmeno">Jméno</label>
+                            <input id="odberatelJmeno" name="odberatelJmeno" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="odberatelPrijmeni">Příjmení</label>
+                            <input id="odberatelPrijmeni" name="odberatelPrijmeni" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="odberatelUliceCp">Ulice a číslo popisné</label>
+                            <input id="odberatelUliceCp" name="odberatelUliceCp" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="odberatelPsc">PSČ</label>
+                            <input id="odberatelPsc" name="odberatelPsc" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="odberatelMesto">Město</label>
+                            <input id="odberatelMesto" name="odberatelMesto" />
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-chapter second-row">
+                    <div class="form-part">
+                        <button type="button" id="addItemButton">Přidat položku</button>
+                        <div id="itemsContainer"></div>
+                    </div>
+                </div>
+
+                <div class="form-chapter third-row">
+                    <div class="form-part">
+                        <div class="form-group">
+                            <label for="cisloUctu">Číslo účtu</label>
+                            <input id="cisloUctu" name="cisloUctu" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="iban">IBAN</label>
+                            <input id="iban" name="iban" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="swift">SWIFT</label>
+                            <input id="swift" name="swift" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="total">Celková částka</label>
+                        <output id="total" name="total">0.00</output>
+                    </div>
+                </div>
+
+                <button type="button" id="printInvoiceButton">
+                    Vygenerovat a vytisknout fakturu
+                </button>
+            </form>
+        </div>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>

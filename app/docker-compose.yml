@@ -1,0 +1,6 @@
+name: fakturovac
+services:
+  app:
+    build: .
+    ports:
+      - "3001:3001"
