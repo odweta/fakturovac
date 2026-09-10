@@ -46,8 +46,8 @@ const invoiceStartingNumberInput = document.getElementById("invoiceStartingNumbe
 const saveNumberingSettingsButton = document.getElementById("saveNumberingSettingsButton");
 const cancelNumberingSettingsButton = document.getElementById("cancelNumberingSettingsButton");
 const numberingSettingsStatus = document.getElementById("numberingSettingsStatus");
-const dueDateOption = document.getElementById("dueDateOption");
-const dueDateDisplay = document.getElementById("dueDateDisplay");
+const issueDateInput = document.getElementById("issueDate");
+const dueDateInput = document.getElementById("dueDate");
 const paymentPresetSelect = document.getElementById("paymentPresetSelect");
 const paymentPresetName = document.getElementById("paymentPresetName");
 const savePaymentPresetButton = document.getElementById("savePaymentPresetButton");
@@ -207,17 +207,17 @@ const getClientLabel = (client) => [
 
 const formatCzechDate = (dateValue) => new Date(`${dateValue}T00:00:00`).toLocaleDateString("cs-CZ");
 
-const getDueDays = () => Number.parseInt(dueDateOption.value, 10) || 14;
+const toDateInputValue = (date) => date.toISOString().slice(0, 10);
+
+const getIssueDate = () => issueDateInput.value || toDateInputValue(new Date());
 
 const getDueDate = () => {
-    const dueDate = new Date();
-    dueDate.setHours(0, 0, 0, 0);
-    dueDate.setDate(dueDate.getDate() + getDueDays());
-    return dueDate.toISOString().slice(0, 10);
-};
-
-const updateDueDate = () => {
-    dueDateDisplay.textContent = `Splatnost: ${formatCzechDate(getDueDate())}`;
+    if (dueDateInput.value) {
+        return dueDateInput.value;
+    }
+    const dueDate = new Date(`${getIssueDate()}T00:00:00`);
+    dueDate.setDate(dueDate.getDate() + 14);
+    return toDateInputValue(dueDate);
 };
 
 const updateClientTypeFields = () => {
@@ -333,6 +333,8 @@ deletePaymentPresetButton.addEventListener("click", async () => {
 });
 
 const readInvoiceData = () => ({
+    issueDate: getIssueDate(),
+    dueDate: getDueDate(),
     supplier: {
         ...readProfileFields("dodavatel"),
         typSubjektu: supplierTypeSelect.value
@@ -363,6 +365,8 @@ const clearInvoiceEditor = () => {
     currentInvoiceId = null;
     invoiceNumberDisplay.textContent = "Nová faktura";
     invoiceSaveStatus.textContent = "";
+    issueDateInput.value = "";
+    dueDateInput.value = "";
     writeProfileFields("odberatel", {});
     clientSelect.value = "";
     clientTypeSelect.value = "osoba";
@@ -384,6 +388,8 @@ const loadInvoiceIntoEditor = (invoice) => {
     currentInvoiceId = invoice.id;
     invoiceNumberDisplay.textContent = invoice.invoiceNumber;
     invoiceSaveStatus.textContent = "";
+    issueDateInput.value = invoice.data.issueDate || "";
+    dueDateInput.value = invoice.data.dueDate || "";
     writeProfileFields("dodavatel", invoice.data.supplier || {});
     supplierTypeSelect.value = invoice.data.supplier?.typSubjektu || "osoba";
     updateSupplierTypeFields();

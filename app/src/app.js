@@ -480,6 +480,20 @@ app.delete('/api/invoices', requireAuth, async (req, res, next) => {
 });
 
 const pdfText = (value) => String(value || 'Neuvedeno');
+const formatCzechDate = (value) => {
+    const date = new Date(`${value}T00:00:00`);
+    return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString('cs-CZ');
+};
+const toDateInputValue = (date) => date.toISOString().slice(0, 10);
+const resolveIssueDate = (issueDate) => issueDate || toDateInputValue(new Date());
+const resolveDueDate = (dueDate, issueDate) => {
+    if (dueDate) {
+        return dueDate;
+    }
+    const due = new Date(`${resolveIssueDate(issueDate)}T00:00:00`);
+    due.setDate(due.getDate() + 14);
+    return toDateInputValue(due);
+};
 const formatCzechNumber = (value) => Number(value || 0).toLocaleString('cs-CZ', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
@@ -554,13 +568,25 @@ const renderInvoicePdf = async (document, invoice) => {
     const partyWidth = (pageWidth - 24) / 2;
     const customerX = document.page.margins.left + partyWidth + 24;
 
+    const issueDate = resolveIssueDate(data.issueDate);
+    const dueDate = resolveDueDate(data.dueDate, data.issueDate);
+
     const headerY = document.y;
     document.fillColor(navy).font(boldFont).fontSize(25).text('Faktura', document.page.margins.left, headerY);
     document.fillColor(navy).font(boldFont).fontSize(16).text(invoice.invoice_number, customerX, headerY, {
         width: partyWidth,
         align: 'right'
     });
-    document.y = headerY + 40;
+    document.fillColor(bodyText).font(regularFont).fontSize(9)
+        .text(`Datum vystavení: ${formatCzechDate(issueDate)}`, customerX, headerY + 22, {
+            width: partyWidth,
+            align: 'right'
+        })
+        .text(`Datum splatnosti: ${formatCzechDate(dueDate)}`, customerX, headerY + 35, {
+            width: partyWidth,
+            align: 'right'
+        });
+    document.y = headerY + 52;
 
     const partyTop = document.y;
     const drawParty = (x, title, profile, name) => {

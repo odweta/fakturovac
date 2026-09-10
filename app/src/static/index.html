@@ -325,13 +325,13 @@
 
                     <div class="due-date-group">
                         <div class="form-group">
-                            <label for="dueDateOption">Datum splatnosti</label>
-                            <select id="dueDateOption">
-                                <option value="14">14 dní</option>
-                                <option value="30">30 dní</option>
-                            </select>
+                            <label for="issueDate">Datum vystavení</label>
+                            <input type="date" id="issueDate" name="issueDate" placeholder="Dnešní datum" />
                         </div>
-                        <output id="dueDateDisplay" class="due-date-display"></output>
+                        <div class="form-group">
+                            <label for="dueDate">Datum splatnosti</label>
+                            <input type="date" id="dueDate" name="dueDate" placeholder="14 dní od vystavení" />
+                        </div>
                     </div>
                 </div>
 
