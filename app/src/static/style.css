@@ -595,6 +595,12 @@ body {
     outline-offset: 1px;
 }
 
+.field-hint {
+    margin: 0.35rem 0 0;
+    color: var(--muted-ink);
+    font-size: 0.8rem;
+}
+
 .form-group output {
     min-height: 1.5rem;
     padding: 0.25rem 0;
