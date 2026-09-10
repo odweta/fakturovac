@@ -318,6 +318,21 @@
                     </div>
                 </div>
 
+                <div class="form-chapter signature-row">
+                    <div class="form-group signature-group">
+                        <label for="signatureInput">Podpis (nepovinné)</label>
+                        <div id="signatureDropzone" class="signature-dropzone" tabindex="0" role="button" aria-label="Nahrát podpis kliknutím nebo přetažením souboru">
+                            <img id="signaturePreview" class="signature-preview" alt="Náhled podpisu" hidden />
+                            <p id="signatureDropzoneText" class="signature-dropzone-text">Přetáhněte sem obrázek podpisu (420×210 px, JPG nebo PNG) nebo klikněte pro výběr souboru</p>
+                            <input type="file" id="signatureInput" accept="image/png,image/jpeg" hidden />
+                        </div>
+                        <div class="signature-actions">
+                            <button type="button" id="removeSignatureButton" class="secondary-button" hidden>Odstranit podpis</button>
+                        </div>
+                        <p id="signatureStatus" class="signature-status" role="status" aria-live="polite"></p>
+                    </div>
+                </div>
+
                 <button type="button" id="printInvoiceButton">
                     Vygenerovat a vytisknout fakturu
                 </button>

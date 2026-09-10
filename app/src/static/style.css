@@ -621,6 +621,72 @@ body {
     gap: 2rem;
 }
 
+.signature-row {
+    align-items: flex-start;
+}
+
+.signature-group {
+    width: 100%;
+    max-width: 420px;
+}
+
+.signature-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 120px;
+    padding: 1rem;
+    text-align: center;
+    color: var(--muted-ink);
+    background: #fff;
+    border: 2px dashed #c8d0d5;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.signature-dropzone:hover,
+.signature-dropzone:focus-visible {
+    border-color: var(--blue);
+    outline: none;
+}
+
+.signature-dropzone.is-dragover {
+    border-color: var(--blue);
+    background: rgba(43, 111, 143, 0.08);
+}
+
+.signature-dropzone-text {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.signature-preview {
+    display: block;
+    max-width: 100%;
+    max-height: 130px;
+    object-fit: contain;
+    border-radius: 0.25rem;
+}
+
+.signature-actions {
+    margin-top: 0.5rem;
+}
+
+.signature-status {
+    margin: 0.4rem 0 0;
+    min-height: 1.1rem;
+    color: var(--muted-ink);
+    font-size: 0.8rem;
+}
+
+.signature-status.is-error {
+    color: #b3261e;
+}
+
 .total-amount-group {
     grid-column: 1 / -1;
     margin: 0;

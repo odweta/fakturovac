@@ -30,4 +30,23 @@ describe('normalizeInvoiceData', () => {
             { mnozstvi: 'not-a-number', cenaZaMj: 10 }
         ] })).toBeNull();
     });
+
+    test('accepts a valid signature data URL and rejects invalid ones', () => {
+        const withValidSignature = normalizeInvoiceData({
+            items: [{ mnozstvi: 1, cenaZaMj: 10 }],
+            signature: 'data:image/png;base64,aGVsbG8='
+        });
+        expect(withValidSignature.signature).toBe('data:image/png;base64,aGVsbG8=');
+
+        const withInvalidSignature = normalizeInvoiceData({
+            items: [{ mnozstvi: 1, cenaZaMj: 10 }],
+            signature: 'not-a-data-url'
+        });
+        expect(withInvalidSignature.signature).toBeNull();
+
+        const withoutSignature = normalizeInvoiceData({
+            items: [{ mnozstvi: 1, cenaZaMj: 10 }]
+        });
+        expect(withoutSignature.signature).toBeNull();
+    });
 });
