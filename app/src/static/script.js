@@ -41,8 +41,6 @@ const savePasswordButton = document.getElementById("savePasswordButton");
 const cancelPasswordButton = document.getElementById("cancelPasswordButton");
 const passwordStatus = document.getElementById("passwordStatus");
 const dueDateOption = document.getElementById("dueDateOption");
-const customDueDays = document.getElementById("customDueDays");
-const customDueDaysGroup = document.querySelector(".custom-due-days-group");
 const dueDateDisplay = document.getElementById("dueDateDisplay");
 const paymentPresetSelect = document.getElementById("paymentPresetSelect");
 const paymentPresetName = document.getElementById("paymentPresetName");
@@ -110,9 +108,7 @@ const getClientLabel = (client) => [
 
 const formatCzechDate = (dateValue) => new Date(`${dateValue}T00:00:00`).toLocaleDateString("cs-CZ");
 
-const getDueDays = () => dueDateOption.value === "custom"
-    ? Math.max(1, Number.parseInt(customDueDays.value, 10) || 14)
-    : Number.parseInt(dueDateOption.value, 10);
+const getDueDays = () => Number.parseInt(dueDateOption.value, 10) || 14;
 
 const getDueDate = () => {
     const dueDate = new Date();
@@ -122,7 +118,6 @@ const getDueDate = () => {
 };
 
 const updateDueDate = () => {
-    customDueDaysGroup.hidden = dueDateOption.value !== "custom";
     dueDateDisplay.textContent = `Splatnost: ${formatCzechDate(getDueDate())}`;
 };
 
