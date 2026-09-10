@@ -65,6 +65,11 @@ const initializeDatabase = () => {
                 PRIMARY KEY (user_id, invoice_year)
             );
 
+            CREATE TABLE IF NOT EXISTS user_settings (
+                user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+                invoice_starting_number INTEGER NOT NULL DEFAULT 1 CHECK (invoice_starting_number > 0)
+            );
+
             CREATE TABLE IF NOT EXISTS payment_presets (
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

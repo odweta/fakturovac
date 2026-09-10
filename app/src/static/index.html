@@ -65,10 +65,27 @@
                 <summary><span class="account-mark" aria-hidden="true"></span><span id="navEmail" class="signed-in-email"></span></summary>
                 <div class="nav-menu-content account-menu-content">
                     <button type="button" id="passwordButton" class="text-button">Změnit heslo</button>
+                    <button type="button" id="numberingSettingsButton" class="text-button">Číslování faktur</button>
                     <button type="button" id="logoutButton" class="text-button">Odhlásit se</button>
                 </div>
             </details>
         </nav>
+
+        <section id="numberingSettingsPanel" class="password-panel" hidden>
+            <div id="numberingSettingsForm">
+                <h3>Číslování faktur</h3>
+                <div class="form-group">
+                    <label for="invoiceStartingNumber">Počáteční číslo faktury (pro aktuální rok)</label>
+                    <input id="invoiceStartingNumber" type="number" min="1" step="1" placeholder="1" />
+                    <p class="field-hint">Určuje, od jakého čísla se budou generovat nové faktury v roce, kdy zatím žádnou nemáte. Výchozí hodnota je 1.</p>
+                </div>
+                <div class="saved-data-actions">
+                    <button type="button" id="saveNumberingSettingsButton">Uložit</button>
+                    <button type="button" id="cancelNumberingSettingsButton" class="secondary-button">Zrušit</button>
+                    <span id="numberingSettingsStatus" role="status" aria-live="polite"></span>
+                </div>
+            </div>
+        </section>
 
         <section id="passwordPanel" class="password-panel" hidden>
             <div id="passwordForm">
@@ -315,6 +332,21 @@
                             <label for="dueDate">Datum splatnosti</label>
                             <input type="date" id="dueDate" name="dueDate" placeholder="14 dní od vystavení" />
                         </div>
+                    </div>
+                </div>
+
+                <div class="form-chapter signature-row">
+                    <div class="form-group signature-group">
+                        <label for="signatureInput">Podpis (nepovinné)</label>
+                        <div id="signatureDropzone" class="signature-dropzone" tabindex="0" role="button" aria-label="Nahrát podpis kliknutím nebo přetažením souboru">
+                            <img id="signaturePreview" class="signature-preview" alt="Náhled podpisu" hidden />
+                            <p id="signatureDropzoneText" class="signature-dropzone-text">Přetáhněte sem obrázek podpisu (420×210 px, JPG nebo PNG) nebo klikněte pro výběr souboru</p>
+                            <input type="file" id="signatureInput" accept="image/png,image/jpeg" hidden />
+                        </div>
+                        <div class="signature-actions">
+                            <button type="button" id="removeSignatureButton" class="secondary-button" hidden>Odstranit podpis</button>
+                        </div>
+                        <p id="signatureStatus" class="signature-status" role="status" aria-live="polite"></p>
                     </div>
                 </div>
 

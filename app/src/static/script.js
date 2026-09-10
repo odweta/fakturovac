@@ -40,11 +40,23 @@ const passwordForm = document.getElementById("passwordForm");
 const savePasswordButton = document.getElementById("savePasswordButton");
 const cancelPasswordButton = document.getElementById("cancelPasswordButton");
 const passwordStatus = document.getElementById("passwordStatus");
+const numberingSettingsButton = document.getElementById("numberingSettingsButton");
+const numberingSettingsPanel = document.getElementById("numberingSettingsPanel");
+const invoiceStartingNumberInput = document.getElementById("invoiceStartingNumber");
+const saveNumberingSettingsButton = document.getElementById("saveNumberingSettingsButton");
+const cancelNumberingSettingsButton = document.getElementById("cancelNumberingSettingsButton");
+const numberingSettingsStatus = document.getElementById("numberingSettingsStatus");
 const issueDateInput = document.getElementById("issueDate");
 const dueDateInput = document.getElementById("dueDate");
 const paymentPresetSelect = document.getElementById("paymentPresetSelect");
 const paymentPresetName = document.getElementById("paymentPresetName");
 const savePaymentPresetButton = document.getElementById("savePaymentPresetButton");
+const signatureDropzone = document.getElementById("signatureDropzone");
+const signatureInput = document.getElementById("signatureInput");
+const signaturePreview = document.getElementById("signaturePreview");
+const signatureDropzoneText = document.getElementById("signatureDropzoneText");
+const removeSignatureButton = document.getElementById("removeSignatureButton");
+const signatureStatus = document.getElementById("signatureStatus");
 const loadPaymentPresetButton = document.getElementById("loadPaymentPresetButton");
 const deletePaymentPresetButton = document.getElementById("deletePaymentPresetButton");
 
@@ -68,6 +80,93 @@ let invoices = [];
 let paymentPresets = [];
 let currentInvoiceId = null;
 let isRegistrationMode = false;
+let signatureDataUrl = null;
+
+const SIGNATURE_WIDTH = 420;
+const SIGNATURE_HEIGHT = 210;
+
+const setSignatureStatus = (message, isError = false) => {
+    signatureStatus.textContent = message || "";
+    signatureStatus.classList.toggle("is-error", Boolean(isError));
+};
+
+const applySignaturePreview = (dataUrl) => {
+    signatureDataUrl = dataUrl || null;
+    if (signatureDataUrl) {
+        signaturePreview.src = signatureDataUrl;
+        signaturePreview.hidden = false;
+        signatureDropzoneText.hidden = true;
+        removeSignatureButton.hidden = false;
+    } else {
+        signaturePreview.hidden = true;
+        signaturePreview.src = "";
+        signatureDropzoneText.hidden = false;
+        removeSignatureButton.hidden = true;
+    }
+};
+
+const readImageDimensions = (dataUrl) => new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight });
+    image.onerror = () => reject(new Error("Obrázek se nepodařilo načíst."));
+    image.src = dataUrl;
+});
+
+const handleSignatureFile = async (file) => {
+    if (!file) {
+        return;
+    }
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+        setSignatureStatus("Podporovány jsou pouze soubory JPG nebo PNG.", true);
+        return;
+    }
+    try {
+        const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error("Soubor se nepodařilo načíst."));
+            reader.readAsDataURL(file);
+        });
+        const { width, height } = await readImageDimensions(dataUrl);
+        if (width !== SIGNATURE_WIDTH || height !== SIGNATURE_HEIGHT) {
+            setSignatureStatus(`Obrázek musí mít rozměry přesně ${SIGNATURE_WIDTH}×${SIGNATURE_HEIGHT} px (nahráno ${width}×${height} px).`, true);
+            return;
+        }
+        applySignaturePreview(dataUrl);
+        setSignatureStatus("Podpis byl nahrán.");
+    } catch (error) {
+        setSignatureStatus(error.message, true);
+    }
+};
+
+signatureDropzone.addEventListener("click", () => signatureInput.click());
+signatureDropzone.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        signatureInput.click();
+    }
+});
+signatureDropzone.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    signatureDropzone.classList.add("is-dragover");
+});
+signatureDropzone.addEventListener("dragleave", () => {
+    signatureDropzone.classList.remove("is-dragover");
+});
+signatureDropzone.addEventListener("drop", (event) => {
+    event.preventDefault();
+    signatureDropzone.classList.remove("is-dragover");
+    handleSignatureFile(event.dataTransfer.files[0]);
+});
+signatureInput.addEventListener("change", () => {
+    handleSignatureFile(signatureInput.files[0]);
+    signatureInput.value = "";
+});
+removeSignatureButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    applySignaturePreview(null);
+    setSignatureStatus("");
+});
 
 const profileFieldMap = {
     nazevSpolecnosti: "NazevSpolecnosti",
@@ -249,6 +348,7 @@ const readInvoiceData = () => ({
         iban: getValue("iban"),
         swift: getValue("swift")
     },
+    signature: signatureDataUrl,
     total: Number.parseFloat(getValue("total").replace(",", ".")) || 0,
     items: Array.from(itemsContainer.querySelectorAll(".invoice-item")).map((item) => {
         const inputs = item.querySelectorAll("input");
@@ -277,6 +377,8 @@ const clearInvoiceEditor = () => {
     ["cisloUctu", "iban", "swift"].forEach((id) => {
         document.getElementById(id).value = "";
     });
+    applySignaturePreview(null);
+    setSignatureStatus("");
     itemsContainer.replaceChildren();
     itemIndex = 0;
     updateTotal();
@@ -300,6 +402,8 @@ const loadInvoiceIntoEditor = (invoice) => {
     ["cisloUctu", "iban", "swift"].forEach((id) => {
         document.getElementById(id).value = invoice.data.payment?.[id] || "";
     });
+    applySignaturePreview(invoice.data.signature || null);
+    setSignatureStatus("");
     itemsContainer.replaceChildren();
     itemIndex = 0;
     (invoice.data.items || []).forEach((item) => addInvoiceItem(item));
@@ -525,8 +629,25 @@ deleteClientButton.addEventListener("click", async () => {
 const showInvoiceApp = async () => {
     authScreen.hidden = true;
     document.getElementById("main-container").hidden = false;
-    await Promise.all([loadSupplier(), loadClients(), loadInvoices(), loadPaymentPresets()]);
+    await Promise.all([loadSupplier(), loadClients(), loadInvoices(), loadPaymentPresets(), loadNumberingSettings()]);
     showInvoiceScreen("list");
+};
+
+const loadNumberingSettings = async () => {
+    try {
+        const { settings } = await apiRequest("/api/settings");
+        invoiceStartingNumberInput.value = settings.invoiceStartingNumber;
+        invoiceStartingNumberInput.placeholder = String(settings.invoiceStartingNumber);
+    } catch {
+        // Keep the placeholder default if settings cannot be loaded.
+    }
+};
+
+const showNumberingSettingsPanel = (visible) => {
+    numberingSettingsPanel.hidden = !visible;
+    if (!visible) {
+        numberingSettingsStatus.textContent = "";
+    }
 };
 
 const showPasswordPanel = (visible) => {
@@ -580,6 +701,24 @@ logoutButton.addEventListener("click", async () => {
 
 passwordButton.addEventListener("click", () => showPasswordPanel(passwordPanel.hidden));
 cancelPasswordButton.addEventListener("click", () => showPasswordPanel(false));
+
+numberingSettingsButton.addEventListener("click", () => showNumberingSettingsPanel(numberingSettingsPanel.hidden));
+cancelNumberingSettingsButton.addEventListener("click", () => showNumberingSettingsPanel(false));
+
+saveNumberingSettingsButton.addEventListener("click", async () => {
+    numberingSettingsStatus.textContent = "";
+    const invoiceStartingNumber = Number.parseInt(invoiceStartingNumberInput.value, 10) || 1;
+    try {
+        const { settings } = await apiRequest("/api/settings", {
+            method: "PUT",
+            body: JSON.stringify({ invoiceStartingNumber })
+        });
+        invoiceStartingNumberInput.value = settings.invoiceStartingNumber;
+        numberingSettingsStatus.textContent = "Uloženo";
+    } catch (error) {
+        numberingSettingsStatus.textContent = error.message;
+    }
+});
 
 savePasswordButton.addEventListener("click", async () => {
     passwordStatus.textContent = "";

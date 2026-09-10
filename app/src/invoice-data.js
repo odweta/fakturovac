@@ -1,3 +1,5 @@
+const SIGNATURE_DATA_URL_PATTERN = /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/]+=*$/;
+
 const normalizeInvoiceData = (data) => {
     if (!data || !Array.isArray(data.items)) {
         return null;
@@ -16,11 +18,16 @@ const normalizeInvoiceData = (data) => {
         return null;
     }
 
+    const signature = typeof data.signature === 'string' && SIGNATURE_DATA_URL_PATTERN.test(data.signature)
+        ? data.signature
+        : null;
+
     return {
         supplier: data.supplier || {},
         customer: data.customer || {},
         payment: data.payment || {},
         items,
+        signature,
         total: items.reduce((sum, item) => sum + item.mnozstvi * item.cenaZaMj, 0)
     };
 };
