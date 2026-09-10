@@ -33,6 +33,9 @@ body {
 }
 
 .auth-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: min(100%, 760px);
     padding: clamp(1.75rem, 4vw, 3.25rem) clamp(1.75rem, 6vw, 4.5rem);
     background: var(--paper);
@@ -42,6 +45,7 @@ body {
 }
 
 .eyebrow {
+    align-self: flex-start;
     margin: 0 0 0.75rem;
     color: var(--blue);
     font-size: 0.75rem;
