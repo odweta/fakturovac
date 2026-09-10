@@ -90,10 +90,21 @@ const initializeDatabase = () => {
                 UNIQUE (user_id, name)
             );
 
+            CREATE TABLE IF NOT EXISTS signature_profiles (
+                user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+                data_url TEXT NOT NULL
+            );
+
             ALTER TABLE supplier_profiles ADD COLUMN IF NOT EXISTS nazev_spolecnosti TEXT NOT NULL DEFAULT '';
             ALTER TABLE supplier_profiles ADD COLUMN IF NOT EXISTS typ_subjektu TEXT NOT NULL DEFAULT 'osoba';
             ALTER TABLE clients ADD COLUMN IF NOT EXISTS nazev_spolecnosti TEXT NOT NULL DEFAULT '';
             ALTER TABLE clients ADD COLUMN IF NOT EXISTS typ_subjektu TEXT NOT NULL DEFAULT 'osoba';
+
+            INSERT INTO signature_profiles (user_id, data_url)
+                SELECT DISTINCT ON (user_id) user_id, data_url
+                FROM signature_presets
+                ORDER BY user_id, created_at DESC
+            ON CONFLICT (user_id) DO NOTHING;
         `).catch((error) => {
             schemaPromise = undefined;
             throw error;

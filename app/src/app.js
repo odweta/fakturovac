@@ -362,51 +362,37 @@ app.delete('/api/payment-presets/:id', requireAuth, async (req, res, next) => {
     }
 });
 
-const signaturePresetResponse = (row) => ({
-    id: row.id,
-    name: row.name,
-    dataUrl: row.data_url
-});
-
-app.get('/api/signature-presets', requireAuth, async (req, res, next) => {
+app.get('/api/signature', requireAuth, async (req, res, next) => {
     try {
-        const result = await pool.query(
-            'SELECT * FROM signature_presets WHERE user_id = $1 ORDER BY name',
-            [req.userId]
-        );
-        res.json({ presets: result.rows.map(signaturePresetResponse) });
+        const result = await pool.query('SELECT * FROM signature_profiles WHERE user_id = $1', [req.userId]);
+        res.json({ signature: result.rowCount ? result.rows[0].data_url : null });
     } catch (error) {
         next(error);
     }
 });
 
-app.post('/api/signature-presets', requireAuth, async (req, res, next) => {
+app.put('/api/signature', requireAuth, async (req, res, next) => {
     try {
-        const name = String(req.body.name || '').trim();
         const dataUrl = req.body.dataUrl;
-        if (!name) {
-            res.status(400).json({ error: 'Zadejte název podpisu.' });
-            return;
-        }
         if (!isValidSignatureDataUrl(dataUrl)) {
             res.status(400).json({ error: 'Podpis musí být platný obrázek JPG nebo PNG.' });
             return;
         }
         const result = await pool.query(`
-            INSERT INTO signature_presets (user_id, name, data_url)
-            VALUES ($1, $2, $3)
-            ON CONFLICT (user_id, name) DO UPDATE SET data_url = EXCLUDED.data_url
+            INSERT INTO signature_profiles (user_id, data_url)
+            VALUES ($1, $2)
+            ON CONFLICT (user_id) DO UPDATE SET data_url = EXCLUDED.data_url
             RETURNING *
-        `, [req.userId, name, dataUrl]);
-        res.status(201).json({ preset: signaturePresetResponse(result.rows[0]) });
+        `, [req.userId, dataUrl]);
+        res.json({ signature: result.rows[0].data_url });
     } catch (error) {
         next(error);
     }
 });
 
-app.delete('/api/signature-presets/:id', requireAuth, async (req, res, next) => {
+app.delete('/api/signature', requireAuth, async (req, res, next) => {
     try {
-        await pool.query('DELETE FROM signature_presets WHERE id = $1 AND user_id = $2', [req.params.id, req.userId]);
+        await pool.query('DELETE FROM signature_profiles WHERE user_id = $1', [req.userId]);
         res.status(204).end();
     } catch (error) {
         next(error);
