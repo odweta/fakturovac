@@ -10,7 +10,7 @@ const { normalizeInvoiceData } = require('./invoice-data');
 const app = express();
 const sessionDurationMs = 1000 * 60 * 60 * 24 * 30;
 
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 
 const hashPassword = (password, salt = crypto.randomBytes(16).toString('hex')) => new Promise((resolve, reject) => {
     crypto.scrypt(password, salt, 64, (error, derivedKey) => {
@@ -535,6 +535,7 @@ const renderInvoicePdf = async (document, invoice) => {
         width: 180,
         margin: 1
     }) : null;
+    const signatureBuffer = data.signature ? Buffer.from(data.signature.split(',')[1], 'base64') : null;
     const pageWidth = document.page.width - document.page.margins.left - document.page.margins.right;
     const navy = '#183b56';
     const line = '#d8d4cc';
@@ -612,6 +613,15 @@ const renderInvoicePdf = async (document, invoice) => {
     const paymentTop = document.page.height - document.page.margins.bottom - paymentCardHeight;
     const paymentLineHeight = 18;
     const qrSize = paymentLineHeight * 3;
+    if (signatureBuffer) {
+        const signatureWidth = 145;
+        const signatureHeight = signatureWidth / 2;
+        const signatureGap = 8;
+        const signatureX = document.page.margins.left + pageWidth - signatureWidth;
+        document.image(signatureBuffer, signatureX, paymentTop - signatureGap - signatureHeight, {
+            fit: [signatureWidth, signatureHeight]
+        });
+    }
     document.roundedRect(document.page.margins.left, paymentTop, pageWidth, paymentCardHeight, 4)
         .fillAndStroke('#f4f7fb', line);
     document.fillColor(navy).font(boldFont).fontSize(11).text('Platební údaje', document.page.margins.left + 10, paymentTop + 10);
