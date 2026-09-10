@@ -37,6 +37,7 @@ body {
     padding: clamp(1.75rem, 5vw, 3.5rem);
     background: var(--paper);
     border: 1px solid rgba(24, 59, 86, 0.12);
+    border-radius: 1rem;
     box-shadow: var(--shadow);
 }
 
@@ -57,6 +58,10 @@ body {
     line-height: 1.05;
 }
 
+.auth-card h1 span {
+    display: block;
+}
+
 .auth-intro {
     margin: 1.25rem 0 2rem;
     color: var(--muted-ink);
@@ -74,18 +79,21 @@ body {
 
 #authSubmitButton {
     margin-top: 0.5rem;
+    min-height: 3rem;
     padding: 0.8rem 1rem;
     color: #fff;
     background: var(--navy);
     border: 0;
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
     cursor: pointer;
     font: inherit;
     font-weight: 700;
+    transition: background-color 160ms ease, transform 160ms ease;
 }
 
 #authSubmitButton:hover:not(:disabled) {
     background: var(--blue);
+    transform: translateY(-1px);
 }
 
 .text-button {
@@ -97,6 +105,12 @@ body {
     font: inherit;
     font-weight: 700;
     text-align: left;
+}
+
+.text-button:focus-visible,
+#authSubmitButton:focus-visible {
+    outline: 3px solid rgba(43, 111, 143, 0.3);
+    outline-offset: 3px;
 }
 
 .text-button:hover {
