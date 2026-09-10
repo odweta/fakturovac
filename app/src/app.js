@@ -572,16 +572,22 @@ const renderInvoicePdf = async (document, invoice) => {
     document.y += 35;
     document.moveTo(document.page.margins.left, document.y).lineTo(document.page.margins.left + pageWidth, document.y)
         .strokeColor(navy).lineWidth(1.5).stroke();
-    document.y += 12;
-    const paymentTop = document.y;
-    document.roundedRect(document.page.margins.left, paymentTop, pageWidth, 165, 4).fillAndStroke('#f4f7fb', line);
+    const paymentCardHeight = 105;
+    const paymentTop = document.page.height - document.page.margins.bottom - paymentCardHeight;
+    const paymentLineHeight = 18;
+    const qrSize = paymentLineHeight * 3;
+    document.roundedRect(document.page.margins.left, paymentTop, pageWidth, paymentCardHeight, 4)
+        .fillAndStroke('#f4f7fb', line);
     document.fillColor(navy).font(boldFont).fontSize(11).text('Platební údaje', document.page.margins.left + 10, paymentTop + 10);
     document.fillColor(bodyText).font(regularFont).fontSize(10)
         .text(`Číslo účtu: ${pdfText(payment.cisloUctu)}`, document.page.margins.left + 10, paymentTop + 35)
-        .text(`IBAN: ${pdfText(payment.iban)}`, document.page.margins.left + 10, paymentTop + 55)
-        .text(`SWIFT: ${pdfText(payment.swift)}`, document.page.margins.left + 10, paymentTop + 75);
+        .text(`IBAN: ${pdfText(payment.iban)}`, document.page.margins.left + 10, paymentTop + 35 + paymentLineHeight)
+        .text(`SWIFT: ${pdfText(payment.swift)}`, document.page.margins.left + 10, paymentTop + 35 + paymentLineHeight * 2);
     if (qrBuffer) {
-        document.image(qrBuffer, document.page.margins.left + pageWidth - 155, paymentTop + 10, { width: 145, height: 145 });
+        document.image(qrBuffer, document.page.margins.left + pageWidth - qrSize - 10, paymentTop + 30, {
+            width: qrSize,
+            height: qrSize
+        });
     }
     document.end();
 };
