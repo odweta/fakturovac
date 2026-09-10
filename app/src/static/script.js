@@ -57,10 +57,8 @@ const signaturePreview = document.getElementById("signaturePreview");
 const signatureDropzoneText = document.getElementById("signatureDropzoneText");
 const removeSignatureButton = document.getElementById("removeSignatureButton");
 const signatureStatus = document.getElementById("signatureStatus");
-const signaturePresetSelect = document.getElementById("signaturePresetSelect");
-const signaturePresetName = document.getElementById("signaturePresetName");
-const saveSignaturePresetButton = document.getElementById("saveSignaturePresetButton");
-const deleteSignaturePresetButton = document.getElementById("deleteSignaturePresetButton");
+const saveSignatureButton = document.getElementById("saveSignatureButton");
+const loadSignatureButton = document.getElementById("loadSignatureButton");
 const loadPaymentPresetButton = document.getElementById("loadPaymentPresetButton");
 const deletePaymentPresetButton = document.getElementById("deletePaymentPresetButton");
 
@@ -82,7 +80,6 @@ let itemIndex = 0;
 let clients = [];
 let invoices = [];
 let paymentPresets = [];
-let signaturePresets = [];
 let currentInvoiceId = null;
 let isRegistrationMode = false;
 let signatureDataUrl = null;
@@ -110,22 +107,31 @@ const applySignaturePreview = (dataUrl) => {
     }
 };
 
-const renderSignaturePresetOptions = (selectedId = signaturePresetSelect.value) => {
-    signaturePresetSelect.innerHTML = "<option value=\"\">Vyberte podpis</option>";
-    signaturePresets.forEach((preset) => {
-        const option = document.createElement("option");
-        option.value = preset.id;
-        option.textContent = preset.name;
-        signaturePresetSelect.appendChild(option);
-    });
-    signaturePresetSelect.value = selectedId;
-    deleteSignaturePresetButton.disabled = !signaturePresetSelect.value;
+const saveSignature = async () => {
+    if (!signatureDataUrl) {
+        setSignatureStatus("Nejprve nahrajte podpis.", true);
+        return;
+    }
+    try {
+        await apiRequest("/api/signature", {
+            method: "PUT",
+            body: JSON.stringify({ dataUrl: signatureDataUrl })
+        });
+        setSignatureStatus("Podpis byl uložen.");
+    } catch (error) {
+        setSignatureStatus(error.message, true);
+    }
 };
 
-const loadSignaturePresets = async () => {
-    const response = await apiRequest("/api/signature-presets");
-    signaturePresets = response.presets;
-    renderSignaturePresetOptions();
+const loadSignature = async () => {
+    const { signature } = await apiRequest("/api/signature");
+    if (signature) {
+        applySignaturePreview(signature);
+        setSignatureStatus("Uloženo na serveru");
+        return true;
+    }
+    setSignatureStatus("Zatím není uložený podpis");
+    return false;
 };
 
 const readImageDimensions = (dataUrl) => new Promise((resolve, reject) => {
@@ -185,49 +191,11 @@ signatureInput.addEventListener("change", () => {
     handleSignatureFile(signatureInput.files[0]);
     signatureInput.value = "";
 });
-signaturePresetSelect.addEventListener("change", () => {
-    const preset = signaturePresets.find(({ id }) => String(id) === signaturePresetSelect.value);
-    deleteSignaturePresetButton.disabled = !preset;
-    if (preset) {
-        signaturePresetName.value = preset.name;
-        applySignaturePreview(preset.dataUrl);
-        setSignatureStatus("Uložený podpis načten.");
-    }
-});
-saveSignaturePresetButton.addEventListener("click", async () => {
-    if (!signatureDataUrl) {
-        setSignatureStatus("Nejprve nahrajte nebo vyberte podpis.", true);
-        return;
-    }
+saveSignatureButton.addEventListener("click", saveSignature);
+loadSignatureButton.addEventListener("click", async () => {
     try {
-        const response = await apiRequest("/api/signature-presets", {
-            method: "POST",
-            body: JSON.stringify({
-                name: signaturePresetName.value,
-                dataUrl: signatureDataUrl
-            })
-        });
-        const preset = response.preset;
-        signaturePresets = [
-            ...signaturePresets.filter((entry) => entry.id !== preset.id && entry.name !== preset.name),
-            preset
-        ].sort((left, right) => left.name.localeCompare(right.name));
-        renderSignaturePresetOptions(String(preset.id));
-        signaturePresetName.value = preset.name;
-        setSignatureStatus("Podpis byl uložen.");
-    } catch (error) {
-        setSignatureStatus(error.message, true);
-    }
-});
-deleteSignaturePresetButton.addEventListener("click", async () => {
-    if (!signaturePresetSelect.value) {
-        return;
-    }
-    try {
-        await apiRequest(`/api/signature-presets/${signaturePresetSelect.value}`, { method: "DELETE" });
-        signaturePresets = signaturePresets.filter(({ id }) => String(id) !== signaturePresetSelect.value);
-        signaturePresetName.value = "";
-        renderSignaturePresetOptions();
+        await loadSignature();
+        setSignatureStatus("Podpis načten.");
     } catch (error) {
         setSignatureStatus(error.message, true);
     }
@@ -448,9 +416,6 @@ const clearInvoiceEditor = () => {
     paymentPresetSelect.value = "";
     paymentPresetName.value = "";
     deletePaymentPresetButton.disabled = true;
-    signaturePresetSelect.value = "";
-    signaturePresetName.value = "";
-    deleteSignaturePresetButton.disabled = true;
     ["cisloUctu", "iban", "swift"].forEach((id) => {
         document.getElementById(id).value = "";
     });
@@ -480,9 +445,6 @@ const loadInvoiceIntoEditor = (invoice) => {
         document.getElementById(id).value = invoice.data.payment?.[id] || "";
     });
     applySignaturePreview(invoice.data.signature || null);
-    signaturePresetSelect.value = "";
-    signaturePresetName.value = "";
-    deleteSignaturePresetButton.disabled = true;
     setSignatureStatus("");
     itemsContainer.replaceChildren();
     itemIndex = 0;
@@ -521,8 +483,9 @@ const loadInvoices = async () => {
     renderInvoiceList();
 };
 
-const openNewInvoice = () => {
+const openNewInvoice = async () => {
     clearInvoiceEditor();
+    await loadSignature();
     showInvoiceScreen("editor");
 };
 
@@ -709,7 +672,7 @@ deleteClientButton.addEventListener("click", async () => {
 const showInvoiceApp = async () => {
     authScreen.hidden = true;
     document.getElementById("main-container").hidden = false;
-    await Promise.all([loadSupplier(), loadClients(), loadInvoices(), loadPaymentPresets(), loadSignaturePresets(), loadNumberingSettings()]);
+    await Promise.all([loadSupplier(), loadClients(), loadInvoices(), loadPaymentPresets(), loadSignature(), loadNumberingSettings()]);
     showInvoiceScreen("list");
 };
 
