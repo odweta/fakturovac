@@ -65,10 +65,27 @@
                 <summary><span class="account-mark" aria-hidden="true"></span><span id="navEmail" class="signed-in-email"></span></summary>
                 <div class="nav-menu-content account-menu-content">
                     <button type="button" id="passwordButton" class="text-button">Změnit heslo</button>
+                    <button type="button" id="numberingSettingsButton" class="text-button">Číslování faktur</button>
                     <button type="button" id="logoutButton" class="text-button">Odhlásit se</button>
                 </div>
             </details>
         </nav>
+
+        <section id="numberingSettingsPanel" class="password-panel" hidden>
+            <div id="numberingSettingsForm">
+                <h3>Číslování faktur</h3>
+                <div class="form-group">
+                    <label for="invoiceStartingNumber">Počáteční číslo faktury (pro aktuální rok)</label>
+                    <input id="invoiceStartingNumber" type="number" min="1" step="1" placeholder="1" />
+                    <p class="field-hint">Určuje, od jakého čísla se budou generovat nové faktury v roce, kdy zatím žádnou nemáte. Výchozí hodnota je 1.</p>
+                </div>
+                <div class="saved-data-actions">
+                    <button type="button" id="saveNumberingSettingsButton">Uložit</button>
+                    <button type="button" id="cancelNumberingSettingsButton" class="secondary-button">Zrušit</button>
+                    <span id="numberingSettingsStatus" role="status" aria-live="polite"></span>
+                </div>
+            </div>
+        </section>
 
         <section id="passwordPanel" class="password-panel" hidden>
             <div id="passwordForm">

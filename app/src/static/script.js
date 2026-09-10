@@ -40,6 +40,12 @@ const passwordForm = document.getElementById("passwordForm");
 const savePasswordButton = document.getElementById("savePasswordButton");
 const cancelPasswordButton = document.getElementById("cancelPasswordButton");
 const passwordStatus = document.getElementById("passwordStatus");
+const numberingSettingsButton = document.getElementById("numberingSettingsButton");
+const numberingSettingsPanel = document.getElementById("numberingSettingsPanel");
+const invoiceStartingNumberInput = document.getElementById("invoiceStartingNumber");
+const saveNumberingSettingsButton = document.getElementById("saveNumberingSettingsButton");
+const cancelNumberingSettingsButton = document.getElementById("cancelNumberingSettingsButton");
+const numberingSettingsStatus = document.getElementById("numberingSettingsStatus");
 const dueDateOption = document.getElementById("dueDateOption");
 const dueDateDisplay = document.getElementById("dueDateDisplay");
 const paymentPresetSelect = document.getElementById("paymentPresetSelect");
@@ -617,8 +623,25 @@ deleteClientButton.addEventListener("click", async () => {
 const showInvoiceApp = async () => {
     authScreen.hidden = true;
     document.getElementById("main-container").hidden = false;
-    await Promise.all([loadSupplier(), loadClients(), loadInvoices(), loadPaymentPresets()]);
+    await Promise.all([loadSupplier(), loadClients(), loadInvoices(), loadPaymentPresets(), loadNumberingSettings()]);
     showInvoiceScreen("list");
+};
+
+const loadNumberingSettings = async () => {
+    try {
+        const { settings } = await apiRequest("/api/settings");
+        invoiceStartingNumberInput.value = settings.invoiceStartingNumber;
+        invoiceStartingNumberInput.placeholder = String(settings.invoiceStartingNumber);
+    } catch {
+        // Keep the placeholder default if settings cannot be loaded.
+    }
+};
+
+const showNumberingSettingsPanel = (visible) => {
+    numberingSettingsPanel.hidden = !visible;
+    if (!visible) {
+        numberingSettingsStatus.textContent = "";
+    }
 };
 
 const showPasswordPanel = (visible) => {
@@ -672,6 +695,24 @@ logoutButton.addEventListener("click", async () => {
 
 passwordButton.addEventListener("click", () => showPasswordPanel(passwordPanel.hidden));
 cancelPasswordButton.addEventListener("click", () => showPasswordPanel(false));
+
+numberingSettingsButton.addEventListener("click", () => showNumberingSettingsPanel(numberingSettingsPanel.hidden));
+cancelNumberingSettingsButton.addEventListener("click", () => showNumberingSettingsPanel(false));
+
+saveNumberingSettingsButton.addEventListener("click", async () => {
+    numberingSettingsStatus.textContent = "";
+    const invoiceStartingNumber = Number.parseInt(invoiceStartingNumberInput.value, 10) || 1;
+    try {
+        const { settings } = await apiRequest("/api/settings", {
+            method: "PUT",
+            body: JSON.stringify({ invoiceStartingNumber })
+        });
+        invoiceStartingNumberInput.value = settings.invoiceStartingNumber;
+        numberingSettingsStatus.textContent = "Uloženo";
+    } catch (error) {
+        numberingSettingsStatus.textContent = error.message;
+    }
+});
 
 savePasswordButton.addEventListener("click", async () => {
     passwordStatus.textContent = "";

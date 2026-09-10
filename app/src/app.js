@@ -227,6 +227,33 @@ app.put('/api/supplier', requireAuth, async (req, res, next) => {
     }
 });
 
+app.get('/api/settings', requireAuth, async (req, res, next) => {
+    try {
+        const result = await pool.query('SELECT invoice_starting_number FROM user_settings WHERE user_id = $1', [req.userId]);
+        res.json({ settings: { invoiceStartingNumber: result.rowCount ? result.rows[0].invoice_starting_number : 1 } });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.put('/api/settings', requireAuth, async (req, res, next) => {
+    try {
+        const invoiceStartingNumber = Number.parseInt(req.body.invoiceStartingNumber, 10);
+        if (!Number.isInteger(invoiceStartingNumber) || invoiceStartingNumber < 1) {
+            res.status(400).json({ error: 'Počáteční číslo faktury musí být kladné celé číslo.' });
+            return;
+        }
+        const result = await pool.query(`
+            INSERT INTO user_settings (user_id, invoice_starting_number) VALUES ($1, $2)
+            ON CONFLICT (user_id) DO UPDATE SET invoice_starting_number = EXCLUDED.invoice_starting_number
+            RETURNING invoice_starting_number
+            `, [req.userId, invoiceStartingNumber]);
+        res.json({ settings: { invoiceStartingNumber: result.rows[0].invoice_starting_number } });
+    } catch (error) {
+        next(error);
+    }
+});
+
 app.get('/api/clients', requireAuth, async (req, res, next) => {
     try {
         const result = await pool.query('SELECT * FROM clients WHERE user_id = $1 ORDER BY created_at, id', [req.userId]);
@@ -376,13 +403,21 @@ app.post('/api/invoices', requireAuth, async (req, res, next) => {
 
         const invoiceYear = new Date().getFullYear();
         await client.query('BEGIN');
+        const settingsResult = await client.query(
+            'SELECT invoice_starting_number FROM user_settings WHERE user_id = $1',
+            [req.userId]
+        );
+        const invoiceStartingNumber = settingsResult.rowCount ? settingsResult.rows[0].invoice_starting_number : 1;
         await client.query(`
             INSERT INTO invoice_counters (user_id, invoice_year, last_number)
-            SELECT $1, $2, COALESCE(MAX((substring(invoice_number FROM '^F-[0-9]{4}-([0-9]+)$'))::integer), 0)
+            SELECT $1, $2, GREATEST(
+                COALESCE(MAX((substring(invoice_number FROM '^F-[0-9]{4}-([0-9]+)$'))::integer), 0),
+                $4 - 1
+            )
             FROM invoices
             WHERE user_id = $1 AND invoice_number LIKE $3
             ON CONFLICT (user_id, invoice_year) DO NOTHING
-        `, [req.userId, invoiceYear, `F-${invoiceYear}-%`]);
+        `, [req.userId, invoiceYear, `F-${invoiceYear}-%`, invoiceStartingNumber]);
         const counterResult = await client.query(`
             UPDATE invoice_counters
             SET last_number = last_number + 1
@@ -573,24 +608,31 @@ const renderInvoicePdf = async (document, invoice) => {
     document.y += 35;
     document.moveTo(document.page.margins.left, document.y).lineTo(document.page.margins.left + pageWidth, document.y)
         .strokeColor(navy).lineWidth(1.5).stroke();
-    document.y += 12;
+    const paymentCardHeight = 105;
+    const paymentTop = document.page.height - document.page.margins.bottom - paymentCardHeight;
+    const paymentLineHeight = 18;
+    const qrSize = paymentLineHeight * 3;
     if (signatureBuffer) {
         const signatureWidth = 145;
         const signatureHeight = signatureWidth / 2;
         const signatureGap = 8;
         const signatureX = document.page.margins.left + pageWidth - signatureWidth;
-        document.image(signatureBuffer, signatureX, document.y, { fit: [signatureWidth, signatureHeight] });
-        document.y += signatureHeight + signatureGap;
+        document.image(signatureBuffer, signatureX, paymentTop - signatureGap - signatureHeight, {
+            fit: [signatureWidth, signatureHeight]
+        });
     }
-    const paymentTop = document.y;
-    document.roundedRect(document.page.margins.left, paymentTop, pageWidth, 165, 4).fillAndStroke('#f4f7fb', line);
+    document.roundedRect(document.page.margins.left, paymentTop, pageWidth, paymentCardHeight, 4)
+        .fillAndStroke('#f4f7fb', line);
     document.fillColor(navy).font(boldFont).fontSize(11).text('Platební údaje', document.page.margins.left + 10, paymentTop + 10);
     document.fillColor(bodyText).font(regularFont).fontSize(10)
         .text(`Číslo účtu: ${pdfText(payment.cisloUctu)}`, document.page.margins.left + 10, paymentTop + 35)
-        .text(`IBAN: ${pdfText(payment.iban)}`, document.page.margins.left + 10, paymentTop + 55)
-        .text(`SWIFT: ${pdfText(payment.swift)}`, document.page.margins.left + 10, paymentTop + 75);
+        .text(`IBAN: ${pdfText(payment.iban)}`, document.page.margins.left + 10, paymentTop + 35 + paymentLineHeight)
+        .text(`SWIFT: ${pdfText(payment.swift)}`, document.page.margins.left + 10, paymentTop + 35 + paymentLineHeight * 2);
     if (qrBuffer) {
-        document.image(qrBuffer, document.page.margins.left + pageWidth - 155, paymentTop + 10, { width: 145, height: 145 });
+        document.image(qrBuffer, document.page.margins.left + pageWidth - qrSize - 10, paymentTop + 30, {
+            width: qrSize,
+            height: qrSize
+        });
     }
     document.end();
 };
