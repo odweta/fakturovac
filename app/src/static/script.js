@@ -277,7 +277,11 @@ const getClientLabel = (client) => [
 
 const formatCzechDate = (dateValue) => new Date(`${dateValue}T00:00:00`).toLocaleDateString("cs-CZ");
 
-const toDateInputValue = (date) => date.toISOString().slice(0, 10);
+const toDateInputValue = (date) => [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0")
+].join("-");
 
 const getIssueDate = () => issueDateInput.value || toDateInputValue(new Date());
 
@@ -435,7 +439,7 @@ const clearInvoiceEditor = () => {
     currentInvoiceId = null;
     invoiceNumberDisplay.textContent = "Nová faktura";
     invoiceSaveStatus.textContent = "";
-    issueDateInput.value = "";
+    issueDateInput.value = toDateInputValue(new Date());
     dueDateInput.value = "";
     writeProfileFields("odberatel", {});
     clientSelect.value = "";
