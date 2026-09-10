@@ -1,5 +1,8 @@
 const SIGNATURE_DATA_URL_PATTERN = /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/]+=*$/;
 
+const isValidSignatureDataUrl = (value) => typeof value === 'string'
+    && SIGNATURE_DATA_URL_PATTERN.test(value);
+
 const normalizeInvoiceData = (data) => {
     if (!data || !Array.isArray(data.items)) {
         return null;
@@ -18,7 +21,7 @@ const normalizeInvoiceData = (data) => {
         return null;
     }
 
-    const signature = typeof data.signature === 'string' && SIGNATURE_DATA_URL_PATTERN.test(data.signature)
+    const signature = isValidSignatureDataUrl(data.signature)
         ? data.signature
         : null;
 
@@ -32,4 +35,4 @@ const normalizeInvoiceData = (data) => {
     };
 };
 
-module.exports = { normalizeInvoiceData };
+module.exports = { isValidSignatureDataUrl, normalizeInvoiceData };

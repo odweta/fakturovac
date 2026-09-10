@@ -1,4 +1,4 @@
-const { normalizeInvoiceData } = require('../src/invoice-data');
+const { isValidSignatureDataUrl, normalizeInvoiceData } = require('../src/invoice-data');
 
 describe('normalizeInvoiceData', () => {
     test('calculates the total from validated line items', () => {
@@ -48,5 +48,11 @@ describe('normalizeInvoiceData', () => {
             items: [{ mnozstvi: 1, cenaZaMj: 10 }]
         });
         expect(withoutSignature.signature).toBeNull();
+    });
+
+    test('validates only supported base64 signature image data URLs', () => {
+        expect(isValidSignatureDataUrl('data:image/jpeg;base64,aGVsbG8=')).toBe(true);
+        expect(isValidSignatureDataUrl('data:image/gif;base64,aGVsbG8=')).toBe(false);
+        expect(isValidSignatureDataUrl('data:image/png;base64,not valid')).toBe(false);
     });
 });
